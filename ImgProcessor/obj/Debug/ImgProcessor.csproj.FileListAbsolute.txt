@@ -1,0 +1,11 @@
+C:\Users\MyPC\source\repos\ImgProcessor\ImgProcessor\bin\Debug\ImgProcessor.exe.config
+C:\Users\MyPC\source\repos\ImgProcessor\ImgProcessor\bin\Debug\ImgProcessor.exe
+C:\Users\MyPC\source\repos\ImgProcessor\ImgProcessor\bin\Debug\ImgProcessor.pdb
+C:\Users\MyPC\source\repos\ImgProcessor\ImgProcessor\obj\Debug\ImgProcessor.csprojAssemblyReference.cache
+C:\Users\MyPC\source\repos\ImgProcessor\ImgProcessor\obj\Debug\ImgProcessor.Form1.resources
+C:\Users\MyPC\source\repos\ImgProcessor\ImgProcessor\obj\Debug\ImgProcessor.Properties.Resources.resources
+C:\Users\MyPC\source\repos\ImgProcessor\ImgProcessor\obj\Debug\ImgProcessor.csproj.GenerateResource.cache
+C:\Users\MyPC\source\repos\ImgProcessor\ImgProcessor\obj\Debug\ImgProcessor.csproj.CoreCompileInputs.cache
+C:\Users\MyPC\source\repos\ImgProcessor\ImgProcessor\obj\Debug\ImgProcessor.exe
+C:\Users\MyPC\source\repos\ImgProcessor\ImgProcessor\obj\Debug\ImgProcessor.pdb
+C:\Users\MyPC\source\repos\ImgProcessor\ImgProcessor\obj\Debug\ImgProcessor.test.resources
