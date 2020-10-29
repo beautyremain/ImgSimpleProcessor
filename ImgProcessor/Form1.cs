@@ -14,21 +14,29 @@ namespace ImgProcessor
     {
         private Graphics g2;
         private Graphics gReal;
-        private Graphics g_data;
         public Bitmap bitmap;
-        private bool isChoosed=false;
+        private bool isChoosed = false;
         public Form1()
         {
             InitializeComponent();
+            tabControllerInit();
+            //this.tabControl1.SelectedIndexChanged += tabControl1_SelectedIndexChanged;
             this.StartPosition = FormStartPosition.CenterScreen;
             label_state.Text = "normal";
-            g_data = pictureBox_data.CreateGraphics();
-            g2 = pictureBox2.CreateGraphics();
-            
+            g2 = pictureBox_WorkPlace.CreateGraphics();
+            this.trackBar_Hsi_H.ValueChanged += new System.EventHandler((a, b) => Hsi_Datapicturebox_Layout());
+
+        }
+        private void tabControllerInit()
+        {
+            foreach (Control tab_page in this.tabControl1.TabPages)
+            {
+                tab_page.Parent = null;
+            }
         }
         private void reset()
         {
-            cleanWorkPlace();
+
             hsiReset();
             paintReset();
             greyReset();
@@ -36,120 +44,29 @@ namespace ImgProcessor
             etcReset();
 
         }
-        private void radioButton_CheckedChanged(object sender, EventArgs e)
+        private void Reset_Click(object sender, EventArgs e)
         {
-            reset();
             if (isChoosed == false)
             {
                 MessageBox.Show("未选择图片");
                 return;
             }
-            foreach (var item in this.panel1.Controls)
-            {
-                if (item is Button)
-                {
-                    continue;
-                }
-                RadioButton r = (RadioButton)item;
-                if (r.Checked == true)
-                {
-                    Console.WriteLine(r.Tag);
-                    operateLayout((string)r.Tag);
-                    label_funcName.Text = (string)r.Text;
-                    break;
-                }
-            }
-            pictureBox2.Image= ToolFunctions.GetThumbnail((Bitmap)bitmap.Clone(), pictureBox2.Height, pictureBox2.Width) as Image;
+            Page_Reset();
+            pictureBox_WorkPlace.Image = ToolFunctions.GetThumbnail((Bitmap)bitmap.Clone(), pictureBox_WorkPlace.Height, pictureBox_WorkPlace.Width) as Image;
         }
         #region //通用控件初始化函数
-        //功能区无数据
-        private void noDataInDataBox()
-        {
-            g_data.DrawString("无", new Font("等线", 14), Brushes.Black, new Point(160, 105));
-        }
-        private void noDataInDataPanel()
-        {
-            Label l = new Label();
-            l.Location = new Point(160, 50);
-            l.Text = "无";
-            l.Font = new Font("等线", 14);
-            panel_adata.Controls.Add(l);
-        }
+
         //清空功能区域
-        private void cleanWorkPlace()
-        {
-            this.panel_adata.Controls.Clear();
-            this.panel_oper.Controls.Clear();
-            g_data.Clear(Color.White);
-        }
+
         #endregion
         //根据radio更改布局
-        private void operateLayout(string tag)
-        {
-            cleanWorkPlace();
-            ToolFunctions.ClearEvent(pictureBox2, "MouseMove");
-            ToolFunctions.ClearEvent(pictureBox2, "MouseClick");
-            if (tag == "noise")
-            {
-                noiseLayout();
-            }
-            else if(tag == "hsi")
-            {
-                hsiLayout();
-            }
-            else if (tag == "etc")
-            {
-                etcLayout();
-            }
-            else if (tag == "grey")
-            {
-                greyLayout();
-            }
-            else if (tag == "paint")
-            {
-                paintLayout();
-            }
-        }
-
         #region//noise部分
         private Bitmap noise_oldBmp;
-        private void noiseLayout()
-        {
-            noiseReset();
-            noDataInDataBox();
-            noDataInDataPanel();
-            noise_Oper_Layout();
-        }
-        private void noise_Oper_Layout()
-        {
-            this.panel_oper.Controls.Add(this.trackBar_Nd);
-            this.panel_oper.Controls.Add(this.trackBar_Nk);
-            this.panel_oper.Controls.Add(this.trackBar_Nu);
-            this.panel_oper.Controls.Add(this.button_Mid_Filter);
-            this.panel_oper.Controls.Add(this.button_Mean_Filter);
-            this.panel_oper.Controls.Add(this.button_Add_Gauss);
-            this.panel_oper.Controls.Add(this.label17);
-            this.panel_oper.Controls.Add(this.label20);
-            this.panel_oper.Controls.Add(this.label_N_u);
-            this.panel_oper.Controls.Add(this.label_Nd);
-            this.panel_oper.Controls.Add(this.label_Nk);
-            this.panel_oper.Controls.Add(this.label14);
-            this.panel_oper.Controls.Add(this.label12);
-            this.panel_oper.Controls.Add(this.label_Pb);
-            this.panel_oper.Controls.Add(this.label_Pa);
-            this.panel_oper.Controls.Add(this.trackBar_Pb);
-            this.panel_oper.Controls.Add(this.label19);
-            this.panel_oper.Controls.Add(this.trackBar_Pa);
-            this.panel_oper.Controls.Add(this.label18);
-            this.panel_oper.Controls.Add(this.button_Add_Pepper);
-
-
-        }
         private void Button_Mean_Filter_Click(object sender, System.EventArgs e)
         {
             Bitmap newBmp;
             ProcessFunctions.MeanFilter(noise_oldBmp, out newBmp);
-            this.pictureBox2.Image = ToolFunctions.GetThumbnail((Bitmap)newBmp.Clone(), pictureBox2.Height, pictureBox2.Width) as Image;
+            this.pictureBox_WorkPlace.Image = ToolFunctions.GetThumbnail((Bitmap)newBmp.Clone(), pictureBox_WorkPlace.Height, pictureBox_WorkPlace.Width) as Image;
             noise_oldBmp = newBmp;
 
 
@@ -161,8 +78,8 @@ namespace ImgProcessor
             Button b = (Button)sender;
             b.Enabled = false;
             Bitmap newBmp;
-            ProcessFunctions.AddGaussSalt(noise_oldBmp, out newBmp, new GaussParam( ((float)trackBar_Nu.Value) / 10 , ((float)trackBar_Nd.Value) / 10, trackBar_Nk.Value));
-            this.pictureBox2.Image = ToolFunctions.GetThumbnail((Bitmap)newBmp.Clone(), pictureBox2.Height, pictureBox2.Width) as Image;
+            ProcessFunctions.AddGaussSalt(noise_oldBmp, out newBmp, new GaussParam(((float)trackBar_Nu.Value) / 10, ((float)trackBar_Nd.Value) / 10, trackBar_Nk.Value));
+            this.pictureBox_WorkPlace.Image = ToolFunctions.GetThumbnail((Bitmap)newBmp.Clone(), pictureBox_WorkPlace.Height, pictureBox_WorkPlace.Width) as Image;
             noise_oldBmp = newBmp;
             b.Enabled = true;
             label_state.Text = "Finish";
@@ -176,7 +93,7 @@ namespace ImgProcessor
             b.Enabled = false;
             Bitmap newBmp;
             ProcessFunctions.AddPepperSalt(noise_oldBmp, ((float)trackBar_Pa.Value) / 10, ((float)trackBar_Pb.Value) / 10, out newBmp);
-            this.pictureBox2.Image = ToolFunctions.GetThumbnail((Bitmap)newBmp.Clone(), pictureBox2.Height, pictureBox2.Width) as Image;
+            this.pictureBox_WorkPlace.Image = ToolFunctions.GetThumbnail((Bitmap)newBmp.Clone(), pictureBox_WorkPlace.Height, pictureBox_WorkPlace.Width) as Image;
             noise_oldBmp = newBmp;
             b.Enabled = true;
             label_state.Text = "Finish";
@@ -186,7 +103,7 @@ namespace ImgProcessor
         {
             Bitmap newBmp;
             ProcessFunctions.MedianFilter(noise_oldBmp, out newBmp);
-            this.pictureBox2.Image = ToolFunctions.GetThumbnail((Bitmap)newBmp.Clone(), pictureBox2.Height, pictureBox2.Width) as Image;
+            this.pictureBox_WorkPlace.Image = ToolFunctions.GetThumbnail((Bitmap)newBmp.Clone(), pictureBox_WorkPlace.Height, pictureBox_WorkPlace.Width) as Image;
             noise_oldBmp = newBmp;
         }
         private void TrackBar_Nd_ValueChanged(object sender, System.EventArgs e)
@@ -205,7 +122,7 @@ namespace ImgProcessor
         }
         private void TrackBar_Pb_ValueChanged(object sender, System.EventArgs e)
         {
-             this.label_Pb.Text = (((float)trackBar_Pb.Value) / 10).ToString();
+            this.label_Pb.Text = (((float)trackBar_Pb.Value) / 10).ToString();
         }
 
         private void TrackBar_Pa_ValueChanged(object sender, System.EventArgs e)
@@ -222,7 +139,7 @@ namespace ImgProcessor
         private int maxHuePixel = 0;
         private void hsiReset()
         {
-            
+
             HV = 0;
             SV = 0;
             IV = 0;
@@ -232,15 +149,12 @@ namespace ImgProcessor
             Hsi_nowBmp = (Bitmap)bitmap.Clone();
         }
         private Bitmap Hsi_bitmap;
-        private void hsiLayout()
+
+        private void Hsi_Page_Init()
         {
             hsiReset();
-            pictureBox2.MouseClick += Hsi_PictureBox2_MouseClick;
-            Hsi_Oper_Layout();
-            Hsi_Datapanel_Layout();
+            pictureBox_WorkPlace.MouseClick += Hsi_PictureBox2_MouseClick;
             Hsi_Datapicturebox_Layout();
-
-
         }
 
         private void Hsi_PictureBox2_MouseClick(object sender, MouseEventArgs e)
@@ -256,30 +170,31 @@ namespace ImgProcessor
         }
         private void Hsi_Datapicturebox_Layout()
         {
-            g_data.Clear(Color.White);
-            ProcessFunctions.Hue_Calculator(Hsi_nowBmp,out maxHuePixel,ref countHuePixel);
-            Graphics g = pictureBox_data.CreateGraphics();
 
+            ProcessFunctions.Hue_Calculator(Hsi_nowBmp, out maxHuePixel, ref countHuePixel);
+            Graphics g = tabPage_Hsi.CreateGraphics();
+            g.Clear(Color.White);
+            int offset_Y = 350;
             Pen curPen = new Pen(Brushes.Black, 2);
-            g.DrawString("色调直方图", new Font("New Timer", 15), Brushes.Black, new Point(139, 10));
-            g.DrawLine(curPen, 50, 240, 350, 240);
-            g.DrawLine(curPen, 50, 240, 50, 30);
-            g.DrawLine(curPen, 100, 240, 100, 242);
-            g.DrawLine(curPen, 150, 240, 150, 242);
-            g.DrawLine(curPen, 200, 240, 200, 242);
-            g.DrawLine(curPen, 250, 240, 250, 242);
-            g.DrawLine(curPen, 300, 240, 300, 242);
-            g.DrawLine(curPen, 350, 240, 350, 242);
-            g.DrawString("0", new Font("New Timer", 8), Brushes.Black, new PointF(46, 242));
-            g.DrawString("60", new Font("New Timer", 8), Brushes.Black, new PointF(92, 242));
-            g.DrawString("120", new Font("New Timer", 8), Brushes.Black, new PointF(139, 242));
-            g.DrawString("180", new Font("New Timer", 8), Brushes.Black, new PointF(189, 242));
-            g.DrawString("240", new Font("New Timer", 8), Brushes.Black, new PointF(239, 242));
-            g.DrawString("300", new Font("New Timer", 8), Brushes.Black, new PointF(289, 242));
-            g.DrawString("360", new Font("New Timer", 8), Brushes.Black, new PointF(339, 242));
-            g.DrawLine(curPen, 48, 40, 50, 40);
-            g.DrawString("0", new Font("New Timer", 8), Brushes.Black, new PointF(34, 234));
-            g.DrawString(maxHuePixel.ToString(), new Font("New Timer", 8), Brushes.Black, new PointF(18, 34));
+            g.DrawString("色调直方图", new Font("New Timer", 15), Brushes.Black, new Point(139, 10 + offset_Y));
+            g.DrawLine(curPen, 50, 240 + offset_Y, 350, 240 + offset_Y);
+            g.DrawLine(curPen, 50, 240 + offset_Y, 50, 30 + offset_Y);
+            g.DrawLine(curPen, 100, 240 + offset_Y, 100, 242 + offset_Y);
+            g.DrawLine(curPen, 150, 240 + offset_Y, 150, 242 + offset_Y);
+            g.DrawLine(curPen, 200, 240 + offset_Y, 200, 242 + offset_Y);
+            g.DrawLine(curPen, 250, 240 + offset_Y, 250, 242 + offset_Y);
+            g.DrawLine(curPen, 300, 240 + offset_Y, 300, 242 + offset_Y);
+            g.DrawLine(curPen, 350, 240 + offset_Y, 350, 242 + offset_Y);
+            g.DrawString("0", new Font("New Timer", 8), Brushes.Black, new PointF(46, 242 + offset_Y));
+            g.DrawString("60", new Font("New Timer", 8), Brushes.Black, new PointF(92, 242 + offset_Y));
+            g.DrawString("120", new Font("New Timer", 8), Brushes.Black, new PointF(139, 242 + offset_Y));
+            g.DrawString("180", new Font("New Timer", 8), Brushes.Black, new PointF(189, 242 + offset_Y));
+            g.DrawString("240", new Font("New Timer", 8), Brushes.Black, new PointF(239, 242 + offset_Y));
+            g.DrawString("300", new Font("New Timer", 8), Brushes.Black, new PointF(289, 242 + offset_Y));
+            g.DrawString("360", new Font("New Timer", 8), Brushes.Black, new PointF(339, 242 + offset_Y));
+            g.DrawLine(curPen, 48, 40 + offset_Y, 50, 40 + offset_Y);
+            g.DrawString("0", new Font("New Timer", 8), Brushes.Black, new PointF(34, 234 + offset_Y));
+            g.DrawString(maxHuePixel.ToString(), new Font("New Timer", 8), Brushes.Black, new PointF(18, 34 + offset_Y));
 
             double temp = 0;
             for (int i = 0; i < 73; i++)
@@ -291,71 +206,18 @@ namespace ImgProcessor
                 }
                 SolidBrush solidBrush = new SolidBrush(ProcessFunctions.HSL2RGB(5 * i, 0.5, 0.5));
                 Pen ContPen = new Pen(solidBrush, 2);
-                g.DrawLine(ContPen, (float)(60 + 3.5 * i), 240, (float)(60 + 3.5 * i), 240 - (int)temp);
+                g.DrawLine(ContPen, (float)(60 + 3.5 * i), 240 + offset_Y, (float)(60 + 3.5 * i), 240 - (int)temp + offset_Y);
             }
 
             curPen.Dispose();
-        }
-        private void Hsi_Datapanel_Layout()
-        {
-            this.panel_adata.Controls.Add(this.label_I);
-            this.panel_adata.Controls.Add(this.label16);
-            this.panel_adata.Controls.Add(this.label_S);
-            this.panel_adata.Controls.Add(this.label13);
-            this.panel_adata.Controls.Add(this.label_H);
-            this.panel_adata.Controls.Add(this.label11);
         }
         private int HV = 0;
         private int SV = 0;
         private int IV = 0;
         private int HSI_FLAG = 0; //H=1,S=2,I=3
         private Bitmap Hsi_tempBmp;
-        private Bitmap Hsi_nowBmp ;
-        private void Hsi_Oper_Layout()
-        {
-            TrackBar tbH = new TrackBar();            
-            tbH.Maximum = 10;
-            tbH.Minimum = -10;
-            tbH.Value = 0;           
-            tbH.Location = new Point(100, 50);
-            tbH.ValueChanged += Hsi_H_ValueChanged;
-            tbH.ValueChanged += new EventHandler((a, b) => Hsi_Datapicturebox_Layout());
-            this.panel_oper.Controls.Add(tbH);
+        private Bitmap Hsi_nowBmp;
 
-            Label label = new Label();
-            label.Location = new Point(60,45);
-            label.Text = "色调";
-            this.panel_oper.Controls.Add(label);
-
-            TrackBar tbS = new TrackBar();
-            tbS.Maximum = 9;
-            tbS.Minimum = -9;
-            tbS.Value = 0;
-            tbS.Location = new Point(100, 110);
-            tbS.ValueChanged += Hsi_S_ValueChanged;
-            this.panel_oper.Controls.Add(tbS);
-
-            Label label2 = new Label();
-            label2.Location = new Point(60, 105);
-            label2.Text = "饱和度";
-            this.panel_oper.Controls.Add(label2);
-
-            TrackBar tbI = new TrackBar();
-            tbI.Maximum = 5;
-            tbI.Minimum = -5;
-            tbI.Value = 0;
-            tbI.Location = new Point(100, 170);
-            tbI.ValueChanged += Hsi_I_ValueChanged;
-            this.panel_oper.Controls.Add(tbI);
-
-            Label label3 = new Label();
-            label3.Location = new Point(60, 165);
-            label3.Text = "亮度";
-            this.panel_oper.Controls.Add(label3);
-        }
-
-        
-        
         private void Hsi_I_ValueChanged(object sender, EventArgs e)
         {
             TrackBar self = (TrackBar)sender;
@@ -375,7 +237,7 @@ namespace ImgProcessor
                 ProcessFunctions.Hsl_Change("l", IV, (Bitmap)Hsi_tempBmp.Clone(), out dbitmap);
             }
             //I_bmp = dbitmap;
-            this.pictureBox2.Image = ToolFunctions.GetThumbnail((Bitmap)dbitmap.Clone(), pictureBox2.Height, pictureBox2.Width) as Image;
+            this.pictureBox_WorkPlace.Image = ToolFunctions.GetThumbnail((Bitmap)dbitmap.Clone(), pictureBox_WorkPlace.Height, pictureBox_WorkPlace.Width) as Image;
             Hsi_nowBmp = dbitmap;
         }
 
@@ -399,7 +261,7 @@ namespace ImgProcessor
             }
             //S_bmp = dbitmap;
             //Hsi_bitmap = dbitmap;
-            this.pictureBox2.Image = ToolFunctions.GetThumbnail((Bitmap)dbitmap.Clone(), pictureBox2.Height, pictureBox2.Width) as Image;
+            this.pictureBox_WorkPlace.Image = ToolFunctions.GetThumbnail((Bitmap)dbitmap.Clone(), pictureBox_WorkPlace.Height, pictureBox_WorkPlace.Width) as Image;
             Hsi_nowBmp = dbitmap;
         }
 
@@ -421,30 +283,14 @@ namespace ImgProcessor
                 Hsi_tempBmp = dbitmap2;
                 ProcessFunctions.Hsl_Change("h", HV, (Bitmap)Hsi_tempBmp.Clone(), out dbitmap);
             }
-            this.pictureBox2.Image = ToolFunctions.GetThumbnail((Bitmap)dbitmap.Clone(), pictureBox2.Height, pictureBox2.Width) as Image;
+            this.pictureBox_WorkPlace.Image = ToolFunctions.GetThumbnail((Bitmap)dbitmap.Clone(), pictureBox_WorkPlace.Height, pictureBox_WorkPlace.Width) as Image;
             Hsi_nowBmp = dbitmap;
         }
         #endregion
         #region//etc部分
-        private void etcLayout()
-        {
-            etcReset();
-            noDataInDataBox();
-            noDataInDataPanel();
-            etc_Oper_Layout();
-        }
 
-        private void etc_Oper_Layout()
-        {
-            this.panel_oper.Controls.Add(this.label_DV);
-            this.panel_oper.Controls.Add(this.label21);
-            this.panel_oper.Controls.Add(this.trackBar_DV);
-            this.panel_oper.Controls.Add(this.button_TwoD);
-            this.panel_oper.Controls.Add(this.button_Sharpen);
-            this.panel_oper.Controls.Add(this.label_SV);
-            this.panel_oper.Controls.Add(this.label22);
-            this.panel_oper.Controls.Add(this.trackBar_SV);
-        }
+
+
         private void etcReset()
         {
 
@@ -452,8 +298,8 @@ namespace ImgProcessor
         private void button_Sharpen_Click(object sender, EventArgs e)
         {
             Bitmap sharpenBmp;
-            sharpenBmp=ProcessFunctions.SharpenFilter2(bitmap, trackBar_SV.Value);
-            this.pictureBox2.Image = ToolFunctions.GetThumbnail((Bitmap)sharpenBmp.Clone(), pictureBox2.Height, pictureBox2.Width) as Image;
+            sharpenBmp = ProcessFunctions.SharpenFilter2(bitmap, trackBar_SV.Value);
+            this.pictureBox_WorkPlace.Image = ToolFunctions.GetThumbnail((Bitmap)sharpenBmp.Clone(), pictureBox_WorkPlace.Height, pictureBox_WorkPlace.Width) as Image;
 
         }
         private void trackBarDV_ValueChanged(object sender, EventArgs e)
@@ -468,13 +314,13 @@ namespace ImgProcessor
         {
             Bitmap twoVBmp;
             ProcessFunctions.TwoDivision_Change(bitmap, out twoVBmp, trackBar_DV.Value);
-            this.pictureBox2.Image = ToolFunctions.GetThumbnail((Bitmap)twoVBmp.Clone(), pictureBox2.Height, pictureBox2.Width) as Image;
+            this.pictureBox_WorkPlace.Image = ToolFunctions.GetThumbnail((Bitmap)twoVBmp.Clone(), pictureBox_WorkPlace.Height, pictureBox_WorkPlace.Width) as Image;
         }
         #endregion
         #region //grey部分
         private System.Drawing.Bitmap bmpHist;
         private int[] countGreyPixel = new int[256];
-        private int maxGreyPixel=0;
+        private int maxGreyPixel = 0;
 
         private void greyReset()
         {
@@ -485,60 +331,46 @@ namespace ImgProcessor
         private void Grey_Datagraphic_Layout()
         {
             //画出坐标系
-            Graphics g = pictureBox_data.CreateGraphics();
 
+            Graphics g = tabPage_Grey.CreateGraphics();
+            g.Clear(Color.White);
             Pen curPen = new Pen(Brushes.Black, 1);
-            g.DrawString("灰度直方图", new Font("New Timer", 15), Brushes.Black, new Point(139, 10));
-            g.DrawLine(curPen, 50, 240, 320, 240);
-            g.DrawLine(curPen, 50, 240, 50, 30);
-            g.DrawLine(curPen, 100, 240, 100, 242);
-            g.DrawLine(curPen, 150, 240, 150, 242);
-            g.DrawLine(curPen, 200, 240, 200, 242);
-            g.DrawLine(curPen, 250, 240, 250, 242);
-            g.DrawLine(curPen, 300, 240, 300, 242);
-            g.DrawString("0", new Font("New Timer", 8), Brushes.Black, new PointF(46, 242));
-            g.DrawString("50", new Font("New Timer", 8), Brushes.Black, new PointF(92, 242));
-            g.DrawString("100", new Font("New Timer", 8), Brushes.Black, new PointF(139, 242));
-            g.DrawString("150", new Font("New Timer", 8), Brushes.Black, new PointF(189, 242));
-            g.DrawString("200", new Font("New Timer", 8), Brushes.Black, new PointF(239, 242));
-            g.DrawString("250", new Font("New Timer", 8), Brushes.Black, new PointF(289, 242));
-            g.DrawLine(curPen, 48, 40, 50, 40);
-            g.DrawString("0", new Font("New Timer", 8), Brushes.Black, new PointF(34, 234));
-            g.DrawString(maxGreyPixel.ToString(), new Font("New Timer", 8), Brushes.Black, new PointF(18, 34));
+            int offset_Y = 350;
+            g.DrawString("灰度直方图", new Font("New Timer", 15), Brushes.Black, new Point(139, 10 + offset_Y));
+
+            g.DrawLine(curPen, 50, 240 + offset_Y, 320, 240 + offset_Y);
+            g.DrawLine(curPen, 50, 240 + offset_Y, 50, 30 + offset_Y);
+            g.DrawLine(curPen, 100, 240 + offset_Y, 100, 242 + offset_Y);
+            g.DrawLine(curPen, 150, 240 + offset_Y, 150, 242 + offset_Y);
+            g.DrawLine(curPen, 200, 240 + offset_Y, 200, 242 + offset_Y);
+            g.DrawLine(curPen, 250, 240 + offset_Y, 250, 242 + offset_Y);
+            g.DrawLine(curPen, 300, 240 + offset_Y, 300, 242 + offset_Y);
+            g.DrawString("0", new Font("New Timer", 8), Brushes.Black, new PointF(46, 242 + offset_Y));
+            g.DrawString("50", new Font("New Timer", 8), Brushes.Black, new PointF(92, 242 + offset_Y));
+            g.DrawString("100", new Font("New Timer", 8), Brushes.Black, new PointF(139, 242 + offset_Y));
+            g.DrawString("150", new Font("New Timer", 8), Brushes.Black, new PointF(189, 242 + offset_Y));
+            g.DrawString("200", new Font("New Timer", 8), Brushes.Black, new PointF(239, 242 + offset_Y));
+            g.DrawString("250", new Font("New Timer", 8), Brushes.Black, new PointF(289, 242 + offset_Y));
+            g.DrawLine(curPen, 48, 40 + offset_Y, 50, 40 + offset_Y);
+            g.DrawString("0", new Font("New Timer", 8), Brushes.Black, new PointF(34, 234 + offset_Y));
+            g.DrawString(maxGreyPixel.ToString(), new Font("New Timer", 8), Brushes.Black, new PointF(18, 34 + offset_Y));
 
             double temp = 0;
             for (int i = 0; i < 256; i++)
             {
                 temp = 200.0 * countGreyPixel[i] / maxGreyPixel;
-                g.DrawLine(curPen, 50 + i, 240, 50 + i, 240 - (int)temp);
+                g.DrawLine(curPen, 50 + i, 240 + offset_Y, 50 + i, 240 - (int)temp + offset_Y);
             }
 
             curPen.Dispose();
         }
-        private void Grey_Operate_Layout()
-        {
-            Button button = new Button();
-            button.Text = "直方图均衡化";
-            button.Location = new Point(50, 50);
-            button.Click += Get_Balance_Click;
-            this.panel_oper.Controls.Add(button);
-
-            TrackBar tb = new TrackBar();
-            tb.ValueChanged += Tb_ValueChanged;
-            tb.Maximum = 10;
-            tb.Minimum = -10;
-            tb.Value = 0;
-            tb.Location = new Point(100, 100);
-            this.panel_oper.Controls.Add(tb);
-        }
-
-        private void Tb_ValueChanged(object sender, EventArgs e)
+        private void TrackBar_Grey_ValueChange(object sender, EventArgs e)
         {
             TrackBar self = (TrackBar)sender;
             Bitmap dbitmap;
             ProcessFunctions.Grey_Change(bmpHist, out dbitmap, self.Value);
-            this.pictureBox2.Image = ToolFunctions.GetThumbnail((Bitmap)dbitmap.Clone(), pictureBox2.Height, pictureBox2.Width) as Image;
-            this.pictureBox_data.CreateGraphics().Clear(Color.White);
+            this.pictureBox_WorkPlace.Image = ToolFunctions.GetThumbnail((Bitmap)dbitmap.Clone(), pictureBox_WorkPlace.Height, pictureBox_WorkPlace.Width) as Image;
+            //this.pictureBox_data.CreateGraphics().Clear(Color.White);
             ProcessFunctions.Grey_Calculator(dbitmap, out maxGreyPixel, ref countGreyPixel);
             Grey_Datagraphic_Layout();
         }
@@ -550,37 +382,24 @@ namespace ImgProcessor
             self.Text = "已均衡化";
             Bitmap dbitmap;
             ProcessFunctions.Balance(bmpHist, out dbitmap);
-            this.pictureBox2.Image = ToolFunctions.GetThumbnail((Bitmap)dbitmap.Clone(), pictureBox2.Height, pictureBox2.Width) as Image;
-            this.pictureBox_data.CreateGraphics().Clear(Color.White);
+            this.pictureBox_WorkPlace.Image = ToolFunctions.GetThumbnail((Bitmap)dbitmap.Clone(), pictureBox_WorkPlace.Height, pictureBox_WorkPlace.Width) as Image;
+            //this.pictureBox_data.CreateGraphics().Clear(Color.White);
             ProcessFunctions.Grey_Calculator(dbitmap, out maxGreyPixel, ref countGreyPixel);
             Grey_Datagraphic_Layout();
         }
-
-        private void greyLayout()
+        private void Grey_Page_Init()
         {
-            bmpHist = bitmap;
+            greyReset();
             ProcessFunctions.Grey_Calculator(bmpHist, out maxGreyPixel, ref countGreyPixel);
+            this.pictureBox_WorkPlace.MouseClick += PictureBox2_MouseClick_GetColor;
             Grey_Datagraphic_Layout();
-            Grey_Operate_Layout();
-            Grey_Datapanel_Layout();
-            this.pictureBox2.MouseClick += PictureBox2_MouseClick_GetColor;
         }
-        private void Grey_Datapanel_Layout()
+
+
+        private bool GetColor(MouseEventArgs e, out Color c)
         {
-            this.panel_adata.Controls.Add(this.pictureBox_eg);
-            this.panel_adata.Controls.Add(this.label_Grey);
-            this.panel_adata.Controls.Add(this.label15);
-            this.panel_adata.Controls.Add(this.label_B);
-            this.panel_adata.Controls.Add(this.label_G);
-            this.panel_adata.Controls.Add(this.label_R);
-            this.panel_adata.Controls.Add(this.label10);
-            this.panel_adata.Controls.Add(this.label9);
-            this.panel_adata.Controls.Add(this.label1);
-        }
-        private bool GetColor(MouseEventArgs e,out Color c)
-        {
-            int bw = bitmap.Width * pictureBox2.Height / bitmap.Height;
-            int pw = pictureBox2.Width;
+            int bw = bitmap.Width * pictureBox_WorkPlace.Height / bitmap.Height;
+            int pw = pictureBox_WorkPlace.Width;
             int offset_x = (pw - bw) / 2;
             Point clickp = new Point(e.Location.X - offset_x, e.Location.Y);
             if (clickp.X < 0 || clickp.X > bw)
@@ -591,99 +410,61 @@ namespace ImgProcessor
             //e.Location.X -= offset_x;
             Console.WriteLine(bw);
             Console.WriteLine(pw);
-            c=ProcessFunctions.GetColor(MousePosition);
+            c = ProcessFunctions.GetColor(MousePosition);
             return true;
         }
         private void PictureBox2_MouseClick_GetColor(object sender, MouseEventArgs e)
         {
 
             Color c;
-            if(GetColor(e,out c) == false)
+            if (GetColor(e, out c) == false)
             {
                 return;
             }
-            label_R.Text = c.R.ToString();
-            label_G.Text = c.G.ToString();
-            label_B.Text = c.B.ToString();
+            label_GR.Text = c.R.ToString();
+            label_GG.Text = c.G.ToString();
+            label_GB.Text = c.B.ToString();
             pictureBox_eg.BackColor = c;
             double Grey = c.R * 0.299 + c.G * 0.587 + c.B * 0.114;
-            label_Grey.Text = Grey.ToString();
+            label_GGrey.Text = Grey.ToString();
+            panel_Grey_GetColor.CreateGraphics().Clear(c);
 
 
         }
         #endregion
         #region//Paint部分
-        TrackBar paint_trackBar;
-        Panel paint_panel;
-        Panel paint_panel2;
         Graphics g_paint_temp;
         Graphics g_paint_temp2;
-        private void paintLayout()
+        private void Paint_Page_Init()
         {
-            noDataInDataBox();
-            noDataInDataPanel();
-
-            Button btn = new Button();
-            btn.Width += 20;
-            btn.Text = "选择画笔颜色";
-            btn.Click += Btn_Click;           
-            btn.Location = new Point(50, 50);
-            panel_oper.Controls.Add(btn);
-
-            pictureBox2.MouseDown += pictureBox2_MouseDown;
-            pictureBox2.MouseMove += pictureBox2_MouseMove;
-            pictureBox2.MouseUp += pictureBox2_MouseUp;
-
-            Label label = new Label();
-            label.Text = "粗细:";
-            label.Location = new Point(50, 110);
-            label.Width = 40;
-            panel_oper.Controls.Add(label);
-
-            paint_trackBar = new TrackBar();
-            paint_trackBar.Maximum = 10;
-            paint_trackBar.Minimum = 1;
-            paint_trackBar.Value = 1;
-            paint_trackBar.Location = new Point(100, 100);
-            paint_trackBar.ValueChanged += TrackBar_ValueChanged;
-            panel_oper.Controls.Add(paint_trackBar);
-
-            paint_panel = new Panel();
-            paint_panel.Width = 60;
-            paint_panel.Height = 10;
-            paint_panel.Location = new Point(110, 150);
-            panel_oper.Controls.Add(paint_panel);
-            g_paint_temp = paint_panel.CreateGraphics();
+            pictureBox_WorkPlace.MouseDown += pictureBox2_Paint_MouseDown;
+            pictureBox_WorkPlace.MouseMove += pictureBox2_Paint_MouseMove;
+            pictureBox_WorkPlace.MouseUp += pictureBox2_Paint_MouseUp;
+            paintReset();
+            g_paint_temp = panel_width.CreateGraphics();
             g_paint_temp.Clear(Color.White);
-            g_paint_temp.DrawLine(new Pen(Brushes.Black, paint_trackBar.Value), new Point(5, 5), new Point(50,5));
-
-            paint_panel2 = new Panel();
-            paint_panel2.Location = new Point(150,50);
-            paint_panel2.Width = 20;
-            paint_panel2.Height = 20;
-            panel_oper.Controls.Add(paint_panel2);
-            g_paint_temp2 = paint_panel2.CreateGraphics();
+            g_paint_temp.DrawLine(new Pen(Brushes.Black, trackBar_Paint.Value), new Point(5, 5), new Point(200, 5));
+            g_paint_temp2 = panel_ColorPick.CreateGraphics();
             g_paint_temp2.Clear(choose_color);
-
         }
 
-        private void TrackBar_ValueChanged(object sender, EventArgs e)
+        private void TrackBar_PaintWidth_ValueChanged(object sender, EventArgs e)
         {
             g_paint_temp.Clear(Color.White);
-            g_paint_temp.DrawLine(new Pen(Brushes.Black, paint_trackBar.Value), new Point(5, 5), new Point(50, 5));
+            g_paint_temp.DrawLine(new Pen(Brushes.Black, trackBar_Paint.Value), new Point(5, 5), new Point(200, 5));
         }
-        
+
         private void paintReset()
         {
             choose_color = Color.Red;
             in_box_flag = 0;
             lastP = new Point(-1, -1);
         }
-        
+
 
         #region //涂鸦的颜色选择板
         private Color choose_color = Color.Red;
-        private void Btn_Click(object sender, EventArgs e)
+        private void Btn_ColorBoard_Click(object sender, EventArgs e)
         {
             ColorDialog ColorForm = new ColorDialog();
             if (ColorForm.ShowDialog() == DialogResult.OK)
@@ -699,11 +480,7 @@ namespace ImgProcessor
 
         #region //涂鸦时picturebox的响应事件
         private int in_box_flag = 0;
-        private void pictureBox2_MouseEnter(object sender, MouseEventArgs e)
-        {
-           
-        }
-        private void pictureBox2_MouseDown(object sender, MouseEventArgs e)
+        private void pictureBox2_Paint_MouseDown(object sender, MouseEventArgs e)
         {
             in_box_flag = 1;
         }
@@ -714,9 +491,9 @@ namespace ImgProcessor
             g2.DrawLine(pen, p1, p2);
             gReal.DrawLine(pen, p1, p2);
         }
-        private void pictureBox2_MouseMove(object sender, MouseEventArgs e)
+        private void pictureBox2_Paint_MouseMove(object sender, MouseEventArgs e)
         {
-            if(isChoosed==false)
+            if (isChoosed == false)
             {
                 return;
             }
@@ -733,7 +510,7 @@ namespace ImgProcessor
                 {
                     SolidBrush solidBrush = new SolidBrush(choose_color);
 
-                    Pen pen = new Pen(solidBrush,paint_trackBar.Value);
+                    Pen pen = new Pen(solidBrush, trackBar_Paint.Value);
 
 
                     myDrawLine(pen, lastP, e.Location);
@@ -745,7 +522,7 @@ namespace ImgProcessor
             }
         }
 
-        private void pictureBox2_MouseUp(object sender, MouseEventArgs e)
+        private void pictureBox2_Paint_MouseUp(object sender, MouseEventArgs e)
         {
             lastP = new Point(-1, -1);
             in_box_flag = 0;
@@ -803,7 +580,7 @@ namespace ImgProcessor
                     {
                         try
                         {
-                            this.pictureBox2.Image.Save(fileName, imgformat);
+                            this.pictureBox_WorkPlace.Image.Save(fileName, imgformat);
                             //MessageBox.Show("图片已经成功保存!");   
                         }
                         catch
@@ -821,8 +598,8 @@ namespace ImgProcessor
             {
                 return;
             }
-            pictureBox2.Image = ToolFunctions.GetThumbnail((Bitmap)bitmap.Clone(), pictureBox2.Height, pictureBox2.Width) as Image;            
-            gReal = Graphics.FromImage(pictureBox2.Image);
+            pictureBox_WorkPlace.Image = ToolFunctions.GetThumbnail((Bitmap)bitmap.Clone(), pictureBox_WorkPlace.Height, pictureBox_WorkPlace.Width) as Image;
+            gReal = Graphics.FromImage(pictureBox_WorkPlace.Image);
         }
         //get button
         private void button1_Click(object sender, EventArgs e)
@@ -830,16 +607,23 @@ namespace ImgProcessor
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
             {
                 isChoosed = true;
-                
+
                 string path = openFileDialog1.FileName;
                 bitmap = (Bitmap)Image.FromFile(path);
                 reset();
-                pictureBox1.Image = ToolFunctions.GetThumbnail((Bitmap)bitmap.Clone(), pictureBox1.Height, pictureBox1.Width) as Image;
-                pictureBox2.Image = ToolFunctions.GetThumbnail((Bitmap)bitmap.Clone(), pictureBox2.Height, pictureBox2.Width) as Image;
+                //pictureBox1.Image = ToolFunctions.GetThumbnail((Bitmap)bitmap.Clone(), pictureBox1.Height, pictureBox1.Width) as Image;
+                pictureBox_WorkPlace.Image = ToolFunctions.GetThumbnail((Bitmap)bitmap.Clone(), pictureBox_WorkPlace.Height, pictureBox_WorkPlace.Width) as Image;
                 //pictureBox2.Width = pictureBox2.Image.Width;
                 //pictureBox2.Height = pictureBox2.Image.Height;
-                gReal = Graphics.FromImage(pictureBox2.Image);
-
+                gReal = Graphics.FromImage(pictureBox_WorkPlace.Image);
+                if (tabControl1.SelectedTab == null)
+                {
+                    return;
+                }
+                foreach (Control control in tabControl1.SelectedTab.Controls)
+                {
+                    control.Enabled = true;
+                }
 
             }
         }
@@ -851,7 +635,130 @@ namespace ImgProcessor
 
         }
 
+        private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Console.WriteLine("Change");
+            if (isChoosed == false)
+            {
+                MessageBox.Show("未选择图片");
+            }
+            label_funcName.Text = tabControl1.SelectedTab == null ? "empty" : tabControl1.SelectedTab.Text;
+            if (tabControl1.SelectedTab == null)
+            {
+                return;
+            }
 
+            foreach (Control c in tabControl1.SelectedTab.Controls)
+            {
+                c.Enabled = isChoosed;
+            } 
+        }
+        
+        private void Page_Reset(){
+            ToolFunctions.ClearEvent(pictureBox_WorkPlace, "MouseMove");
+            ToolFunctions.ClearEvent(pictureBox_WorkPlace, "MouseClick");
+            ToolFunctions.ClearEvent(pictureBox_WorkPlace, "MouseUp");
+            label_funcName.Text = tabControl1.SelectedTab==null?"empty": tabControl1.SelectedTab.Text;
+            if (isChoosed == true)
+            {
+                if (tabControl1.SelectedTab == tabPage_Paint)
+                {
+                    Paint_Page_Init();
+                    Console.WriteLine("in paint");
+                }
+                else if (tabControl1.SelectedTab == tabPage_Grey)
+                {
+                    Grey_Page_Init();
+                    Console.WriteLine("in grey");
+                }
+                else if (tabControl1.SelectedTab == tabPage_Hsi)
+                {
+                    Hsi_Page_Init();
+                }
+            }
+        }
+
+        private void tabControl1_MouseLeave(object sender, EventArgs e)
+        {
+            Grey_Page_Init();
+        }
+
+        private void Form1_Activated(object sender, EventArgs e)
+        {
+            Page_Reset();
+        }
+
+        private void button_checkOrigin_Click(object sender, EventArgs e)
+        {
+            if (bitmap == null)
+            {
+                MessageBox.Show("no original image");
+                return;
+            }
+            Form_ShowOrigin form = new Form_ShowOrigin((Bitmap)bitmap.Clone());
+            form.ShowDialog();
+        }
+
+        private void 涂鸦ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            //Console.WriteLine(tabControl1.TabPages.Count);
+            if(this.tabPage_Paint.Parent==null)
+                this.tabPage_Paint.Parent = tabControl1;
+            tabControl1.SelectedTab = tabPage_Paint;
+
+        }
+
+        private void 灰度变换ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (this.tabPage_Grey.Parent == null)
+                this.tabPage_Grey.Parent = tabControl1;
+            tabControl1.SelectedTab = tabPage_Grey;
+        }
+
+        private void tabControl1_ControlAdded(object sender, ControlEventArgs e)
+        {
+            if (isChoosed == false && tabControl1.TabPages.Count==1)
+            {
+                MessageBox.Show("未选择图片");
+                foreach (Control c in e.Control.Controls)
+                {
+                    c.Enabled = false;
+                }
+            }
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            if (tabControl1.SelectedTab == null)
+            {
+                MessageBox.Show("未打开任何工具");
+            }
+            else
+            {
+                tabControl1.SelectedTab.Parent = null;
+            }
+        }
+
+        private void hsi模块ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (this.tabPage_Hsi.Parent == null)
+                this.tabPage_Hsi.Parent = tabControl1;
+            tabControl1.SelectedTab = tabPage_Hsi;
+        }
+
+        private void 噪声模块ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (this.tabPage_Noise.Parent == null)
+                this.tabPage_Noise.Parent = tabControl1;
+            tabControl1.SelectedTab = tabPage_Noise;
+        }
+
+        private void 其他功能ToolStripMenuItem_Click(object sender, EventArgs e)
+        {           
+            if (this.tabPage_etc.Parent == null)
+                this.tabPage_etc.Parent = tabControl1;
+            tabControl1.SelectedTab = tabPage_etc;
+        }
     }
 }
 

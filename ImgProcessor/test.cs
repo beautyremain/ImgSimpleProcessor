@@ -365,5 +365,16 @@ namespace ImgProcessor
             ProcessFunctions.TwoDivision_Change(bitmap, out twoBmp, 150);
             pictureBox2.Image = ToolFunctions.GetThumbnail((Bitmap)twoBmp.Clone(), pictureBox2.Height, pictureBox2.Width) as Image;
         }
+
+        private void button11_Click(object sender, EventArgs e)
+        {
+            Form_ShowOrigin form = new Form_ShowOrigin(bitmap);
+            
+            form.Location = new Point(2000,350);
+            form.FormBorderStyle = FormBorderStyle.FixedDialog;
+            form.ShowDialog();
+            //DialogResult r = form.DialogResult;
+            //Console.WriteLine(r);
+        }
     }
 }
