@@ -15,6 +15,7 @@ namespace ImgProcessor
         private Graphics g2;
         private Graphics gReal;
         public Bitmap bitmap;
+        private Bitmap origin_bmp;
         private bool isChoosed = false;
         public Form1()
         {
@@ -331,7 +332,7 @@ namespace ImgProcessor
         private void Grey_Datagraphic_Layout()
         {
             //画出坐标系
-
+            
             Graphics g = tabPage_Grey.CreateGraphics();
             g.Clear(Color.White);
             Pen curPen = new Pen(Brushes.Black, 1);
@@ -529,7 +530,46 @@ namespace ImgProcessor
 
         }
         #endregion
+        #region 吸管响应事件
+        private void button6_Click(object sender, EventArgs e)
+        {
+            Button btn = (Button)sender;
+            ToolFunctions.ClearEvent(this.pictureBox_WorkPlace, "MouseDown");
+            ToolFunctions.ClearEvent(this.pictureBox_WorkPlace, "MouseUp");
 
+            if (btn.Text == "使用吸管")
+            {
+                btn.Text = "使用画笔";
+                this.pictureBox_WorkPlace.MouseDown += PictureBox_WorkPlace_MouseDown_GetColor;
+            }
+            else if (btn.Text == "使用画笔")
+            {
+                btn.Text = "使用吸管";
+                this.pictureBox_WorkPlace.MouseDown += pictureBox2_Paint_MouseDown;
+                this.pictureBox_WorkPlace.MouseUp += pictureBox2_Paint_MouseUp;
+            }
+        }
+
+        private void PictureBox_WorkPlace_MouseDown_GetColor(object sender, MouseEventArgs e)
+        {
+            Color c;
+            if (GetColor(e, out c) == false)
+            {
+                return;
+            }
+            panel_Straw.BackColor = c;
+            label_PR.Text = c.R.ToString();
+            label_PG.Text = c.G.ToString();
+            label_PBlue.Text = c.B.ToString();
+        }
+
+        private void button7_Click(object sender, EventArgs e)
+        {
+            button6.PerformClick();
+            choose_color = this.panel_Straw.BackColor;
+            panel_ColorPick.BackColor = choose_color;
+        }
+        #endregion
         #endregion
         #region //主界面按钮响应函数
         //save button
@@ -610,11 +650,14 @@ namespace ImgProcessor
 
                 string path = openFileDialog1.FileName;
                 bitmap = (Bitmap)Image.FromFile(path);
+                origin_bmp = (Bitmap)bitmap.Clone();
                 reset();
+                Size picSize = new Size();
                 //pictureBox1.Image = ToolFunctions.GetThumbnail((Bitmap)bitmap.Clone(), pictureBox1.Height, pictureBox1.Width) as Image;
-                pictureBox_WorkPlace.Image = ToolFunctions.GetThumbnail((Bitmap)bitmap.Clone(), pictureBox_WorkPlace.Height, pictureBox_WorkPlace.Width) as Image;
-                //pictureBox2.Width = pictureBox2.Image.Width;
-                //pictureBox2.Height = pictureBox2.Image.Height;
+                Image temp = ToolFunctions.GetInitThumbnail((Bitmap)bitmap.Clone(), pictureBox_WorkPlace.Height, pictureBox_WorkPlace.Width,out picSize) as Image;
+                this.pictureBox_WorkPlace.Width = picSize.Width;
+                this.pictureBox_WorkPlace.Location = new Point(14 + 1097 / 2 - picSize.Width / 2, 25);
+                this.pictureBox_WorkPlace.Image = temp;
                 gReal = Graphics.FromImage(pictureBox_WorkPlace.Image);
                 if (tabControl1.SelectedTab == null)
                 {
@@ -630,10 +673,6 @@ namespace ImgProcessor
 
         #endregion
 
-        private void panel_oper_Paint(object sender, PaintEventArgs e)
-        {
-
-        }
 
         private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -651,7 +690,19 @@ namespace ImgProcessor
             foreach (Control c in tabControl1.SelectedTab.Controls)
             {
                 c.Enabled = isChoosed;
-            } 
+            }
+            DialogResult dr = MessageBox.Show("是否保存修改结果？", "提示", MessageBoxButtons.OKCancel);
+            if (dr == DialogResult.OK)
+            {
+                bitmap = new Bitmap(this.pictureBox_WorkPlace.Image);
+            }
+            else
+            {
+                this.pictureBox_WorkPlace.Image = ToolFunctions.GetThumbnail((Bitmap)bitmap.Clone(), pictureBox_WorkPlace.Height, pictureBox_WorkPlace.Width);
+            }
+            
+            Page_Reset();
+            
         }
         
         private void Page_Reset(){
@@ -685,7 +736,7 @@ namespace ImgProcessor
 
         private void Form1_Activated(object sender, EventArgs e)
         {
-            Page_Reset();
+            //Page_Reset();
         }
 
         private void button_checkOrigin_Click(object sender, EventArgs e)
@@ -695,7 +746,7 @@ namespace ImgProcessor
                 MessageBox.Show("no original image");
                 return;
             }
-            Form_ShowOrigin form = new Form_ShowOrigin((Bitmap)bitmap.Clone());
+            Form_ShowOrigin form = new Form_ShowOrigin((Bitmap)origin_bmp.Clone());
             form.ShowDialog();
         }
 
@@ -724,6 +775,10 @@ namespace ImgProcessor
                 {
                     c.Enabled = false;
                 }
+            }
+            if (tabControl1.TabPages.Count == 1)
+            {
+                Page_Reset();
             }
         }
 
@@ -759,6 +814,8 @@ namespace ImgProcessor
                 this.tabPage_etc.Parent = tabControl1;
             tabControl1.SelectedTab = tabPage_etc;
         }
+
+
     }
 }
 

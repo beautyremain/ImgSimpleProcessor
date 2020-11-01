@@ -13,7 +13,7 @@ namespace ImgProcessor
 {
     public class ToolFunctions
     {
-        public static Bitmap GetThumbnail(Bitmap b, int destHeight, int destWidth)
+        public static Bitmap GetInitThumbnail(Bitmap b, int destHeight, int destWidth,out Size size)
         {
             System.Drawing.Image imgSource = b;
             System.Drawing.Imaging.ImageFormat thisFormat = imgSource.RawFormat;
@@ -39,6 +39,7 @@ namespace ImgProcessor
                 sW = sWidth;
                 sH = sHeight;
             }
+            size = new Size(sW, sH);
             Bitmap outBmp = new Bitmap(destWidth, destHeight);
             Graphics g = Graphics.FromImage(outBmp);
             g.Clear(Color.Transparent);
@@ -46,7 +47,7 @@ namespace ImgProcessor
             g.CompositingQuality = CompositingQuality.HighQuality;
             g.SmoothingMode = SmoothingMode.HighQuality;
             g.InterpolationMode = InterpolationMode.HighQualityBicubic;
-            g.DrawImage(imgSource, new Rectangle((destWidth - sW) / 2, (destHeight - sH) / 2, sW, sH), 0, 0, imgSource.Width, imgSource.Height, GraphicsUnit.Pixel);
+            g.DrawImage(imgSource, new Rectangle(0, 0, sW, sH), 0, 0, imgSource.Width, imgSource.Height, GraphicsUnit.Pixel);
             g.Dispose();
             // 以下代码为保存图片时，设置压缩质量     
             EncoderParameters encoderParams = new EncoderParameters();
@@ -56,6 +57,11 @@ namespace ImgProcessor
             encoderParams.Param[0] = encoderParam;
             imgSource.Dispose();
             return outBmp;
+        }
+        public static Bitmap GetThumbnail(Bitmap b, int destHeight, int destWidth)
+        {
+            Size s = new Size();
+            return GetInitThumbnail(b, destHeight, destWidth, out s);
         }
         /// <summary>
         /// 删除指定控件的指定事件

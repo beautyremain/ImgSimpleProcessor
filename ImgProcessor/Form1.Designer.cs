@@ -82,9 +82,9 @@
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage_Paint = new System.Windows.Forms.TabPage();
             this.label30 = new System.Windows.Forms.Label();
-            this.label29 = new System.Windows.Forms.Label();
-            this.label27 = new System.Windows.Forms.Label();
-            this.label26 = new System.Windows.Forms.Label();
+            this.label_PBlue = new System.Windows.Forms.Label();
+            this.label_PG = new System.Windows.Forms.Label();
+            this.label_PR = new System.Windows.Forms.Label();
             this.label25 = new System.Windows.Forms.Label();
             this.label24 = new System.Windows.Forms.Label();
             this.button7 = new System.Windows.Forms.Button();
@@ -623,9 +623,9 @@
             // tabPage_Paint
             // 
             this.tabPage_Paint.Controls.Add(this.label30);
-            this.tabPage_Paint.Controls.Add(this.label29);
-            this.tabPage_Paint.Controls.Add(this.label27);
-            this.tabPage_Paint.Controls.Add(this.label26);
+            this.tabPage_Paint.Controls.Add(this.label_PBlue);
+            this.tabPage_Paint.Controls.Add(this.label_PG);
+            this.tabPage_Paint.Controls.Add(this.label_PR);
             this.tabPage_Paint.Controls.Add(this.label25);
             this.tabPage_Paint.Controls.Add(this.label24);
             this.tabPage_Paint.Controls.Add(this.button7);
@@ -654,32 +654,32 @@
             this.label30.TabIndex = 12;
             this.label30.Text = "Blue:";
             // 
-            // label29
+            // label_PBlue
             // 
-            this.label29.AutoSize = true;
-            this.label29.Location = new System.Drawing.Point(99, 335);
-            this.label29.Name = "label29";
-            this.label29.Size = new System.Drawing.Size(11, 12);
-            this.label29.TabIndex = 11;
-            this.label29.Text = "0";
+            this.label_PBlue.AutoSize = true;
+            this.label_PBlue.Location = new System.Drawing.Point(99, 335);
+            this.label_PBlue.Name = "label_PBlue";
+            this.label_PBlue.Size = new System.Drawing.Size(11, 12);
+            this.label_PBlue.TabIndex = 11;
+            this.label_PBlue.Text = "0";
             // 
-            // label27
+            // label_PG
             // 
-            this.label27.AutoSize = true;
-            this.label27.Location = new System.Drawing.Point(102, 303);
-            this.label27.Name = "label27";
-            this.label27.Size = new System.Drawing.Size(11, 12);
-            this.label27.TabIndex = 9;
-            this.label27.Text = "0";
+            this.label_PG.AutoSize = true;
+            this.label_PG.Location = new System.Drawing.Point(102, 303);
+            this.label_PG.Name = "label_PG";
+            this.label_PG.Size = new System.Drawing.Size(11, 12);
+            this.label_PG.TabIndex = 9;
+            this.label_PG.Text = "0";
             // 
-            // label26
+            // label_PR
             // 
-            this.label26.AutoSize = true;
-            this.label26.Location = new System.Drawing.Point(102, 272);
-            this.label26.Name = "label26";
-            this.label26.Size = new System.Drawing.Size(11, 12);
-            this.label26.TabIndex = 8;
-            this.label26.Text = "0";
+            this.label_PR.AutoSize = true;
+            this.label_PR.Location = new System.Drawing.Point(102, 272);
+            this.label_PR.Name = "label_PR";
+            this.label_PR.Size = new System.Drawing.Size(11, 12);
+            this.label_PR.TabIndex = 8;
+            this.label_PR.Text = "0";
             // 
             // label25
             // 
@@ -709,6 +709,7 @@
             this.button7.TabIndex = 5;
             this.button7.Text = "应用";
             this.button7.UseVisualStyleBackColor = true;
+            this.button7.Click += new System.EventHandler(this.button7_Click);
             // 
             // panel_Straw
             // 
@@ -726,6 +727,7 @@
             this.button6.TabIndex = 4;
             this.button6.Text = "使用吸管";
             this.button6.UseVisualStyleBackColor = true;
+            this.button6.Click += new System.EventHandler(this.button6_Click);
             // 
             // panel_width
             // 
@@ -757,6 +759,7 @@
             // 
             // panel_ColorPick
             // 
+            this.panel_ColorPick.BackColor = System.Drawing.Color.Red;
             this.panel_ColorPick.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.panel_ColorPick.Location = new System.Drawing.Point(229, 25);
             this.panel_ColorPick.Name = "panel_ColorPick";
@@ -1306,9 +1309,9 @@
         private System.Windows.Forms.Panel panel_ColorPick;
         private System.Windows.Forms.Button button_ColorPick;
         private System.Windows.Forms.Label label30;
-        private System.Windows.Forms.Label label29;
-        private System.Windows.Forms.Label label27;
-        private System.Windows.Forms.Label label26;
+        private System.Windows.Forms.Label label_PBlue;
+        private System.Windows.Forms.Label label_PG;
+        private System.Windows.Forms.Label label_PR;
         private System.Windows.Forms.Label label25;
         private System.Windows.Forms.Label label24;
         private System.Windows.Forms.Button button7;
