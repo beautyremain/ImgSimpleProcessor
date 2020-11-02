@@ -49,6 +49,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(511, 435);
             this.Controls.Add(this.pictureBox1);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
             this.Name = "Form_ShowOrigin";
             this.Text = "Form_ShowOrigin";
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();

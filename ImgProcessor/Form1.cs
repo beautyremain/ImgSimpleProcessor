@@ -53,6 +53,7 @@ namespace ImgProcessor
                 return;
             }
             Page_Reset();
+            bitmap = (Bitmap)origin_bmp.Clone();
             pictureBox_WorkPlace.Image = ToolFunctions.GetThumbnail((Bitmap)bitmap.Clone(), pictureBox_WorkPlace.Height, pictureBox_WorkPlace.Width) as Image;
         }
         #region //通用控件初始化函数
@@ -79,9 +80,15 @@ namespace ImgProcessor
             Button b = (Button)sender;
             b.Enabled = false;
             Bitmap newBmp;
-            ProcessFunctions.AddGaussSalt(noise_oldBmp, out newBmp, new GaussParam(((float)trackBar_Nu.Value) / 10, ((float)trackBar_Nd.Value) / 10, trackBar_Nk.Value));
-            this.pictureBox_WorkPlace.Image = ToolFunctions.GetThumbnail((Bitmap)newBmp.Clone(), pictureBox_WorkPlace.Height, pictureBox_WorkPlace.Width) as Image;
-            noise_oldBmp = newBmp;
+            GaussParam g = new GaussParam(((float)trackBar_Nu.Value) / 10, ((float)trackBar_Nd.Value) / 10, trackBar_Nk.Value);
+            Task t=new Task(()=> { 
+                ProcessFunctions.AddGaussSalt(noise_oldBmp, out newBmp,g);
+                this.pictureBox_WorkPlace.Image = ToolFunctions.GetThumbnail((Bitmap)newBmp.Clone(), pictureBox_WorkPlace.Height, pictureBox_WorkPlace.Width) as Image;
+                noise_oldBmp = newBmp;
+            });
+            t.Start();
+            t.Wait();
+
             b.Enabled = true;
             label_state.Text = "Finish";
             label_state.BackColor = Color.Green;
@@ -379,8 +386,6 @@ namespace ImgProcessor
         private void Get_Balance_Click(object sender, EventArgs e)
         {
             Button self = (Button)sender;
-            self.Enabled = false;
-            self.Text = "已均衡化";
             Bitmap dbitmap;
             ProcessFunctions.Balance(bmpHist, out dbitmap);
             this.pictureBox_WorkPlace.Image = ToolFunctions.GetThumbnail((Bitmap)dbitmap.Clone(), pictureBox_WorkPlace.Height, pictureBox_WorkPlace.Width) as Image;
@@ -451,8 +456,10 @@ namespace ImgProcessor
 
         private void TrackBar_PaintWidth_ValueChanged(object sender, EventArgs e)
         {
-            g_paint_temp.Clear(Color.White);
-            g_paint_temp.DrawLine(new Pen(Brushes.Black, trackBar_Paint.Value), new Point(5, 5), new Point(200, 5));
+            Graphics g = panel_width.CreateGraphics();
+            g_paint_temp = g;
+            g.Clear(Color.White);
+            g.DrawLine(new Pen(Brushes.Black, trackBar_Paint.Value), new Point(5, 5), new Point(200, 5));
         }
 
         private void paintReset()
@@ -460,6 +467,7 @@ namespace ImgProcessor
             choose_color = Color.Red;
             in_box_flag = 0;
             lastP = new Point(-1, -1);
+            pen_type = 0;
         }
 
 
@@ -481,6 +489,7 @@ namespace ImgProcessor
 
         #region //涂鸦时picturebox的响应事件
         private int in_box_flag = 0;
+        private int pen_type = 0;
         private void pictureBox2_Paint_MouseDown(object sender, MouseEventArgs e)
         {
             in_box_flag = 1;
@@ -489,8 +498,12 @@ namespace ImgProcessor
         private Point lastP = new Point(-1, -1);
         private void myDrawLine(Pen pen, Point p1, Point p2)
         {
+            //mosaic first then draw
+            gReal = Graphics.FromImage(this.pictureBox_WorkPlace.Image);
+            g2 = pictureBox_WorkPlace.CreateGraphics();
             g2.DrawLine(pen, p1, p2);
             gReal.DrawLine(pen, p1, p2);
+            
         }
         private void pictureBox2_Paint_MouseMove(object sender, MouseEventArgs e)
         {
@@ -498,7 +511,7 @@ namespace ImgProcessor
             {
                 return;
             }
-            if (in_box_flag == 1)
+            if (in_box_flag == 1 && pen_type==0)
             {
                 //Console.WriteLine(e.Location.X + "," + e.Location.Y + "  " + flag);
                 if (lastP.X == -1)
@@ -518,15 +531,46 @@ namespace ImgProcessor
 
                     lastP = e.Location;
                 }
-
-
             }
+            if (in_box_flag == 1 && pen_type == 1)
+            {
+                Bitmap dstBmp;
+                
+                ProcessFunctions.setMosaic(bitmap, e.Location, pictureBox_WorkPlace.Size, trackBar_Paint.Value, out dstBmp);
+                //Console.WriteLine("Image size:"+ this.pictureBox_WorkPlace.Image.Width);
+                this.pictureBox_WorkPlace.Image = ToolFunctions.GetThumbnail((Bitmap)dstBmp.Clone(),pictureBox_WorkPlace.Height,pictureBox_WorkPlace.Width);
+                bitmap = new Bitmap(this.pictureBox_WorkPlace.Image);
+            }
+            
         }
 
         private void pictureBox2_Paint_MouseUp(object sender, MouseEventArgs e)
         {
             lastP = new Point(-1, -1);
             in_box_flag = 0;
+
+        }
+        private void button_Mosaic_Click(object sender, EventArgs e)
+        {
+            Button btn = (Button)sender;
+            if (btn.Text == "马赛克笔")
+            {
+                btn.Text = "画笔";
+                this.button6.Enabled = false;
+                this.pen_type = 1;
+                this.trackBar_Paint.Value = 8;
+                //this.pictureBox_WorkPlace.Image.Save("F:\\testSave.jpg");
+                //Bitmap bmp = new Bitmap("F:\\testSave.jpg");
+                //this.pictureBox_WorkPlace.Image = ToolFunctions.GetThumbnail(bmp, pictureBox_WorkPlace.Height, pictureBox_WorkPlace.Width);
+                
+            }
+            else if (btn.Text == "画笔")
+            {
+                btn.Text = "马赛克笔";
+                this.button6.Enabled = true;
+                this.pen_type = 0;
+
+            }
 
         }
         #endregion
@@ -541,12 +585,14 @@ namespace ImgProcessor
             {
                 btn.Text = "使用画笔";
                 this.pictureBox_WorkPlace.MouseDown += PictureBox_WorkPlace_MouseDown_GetColor;
+                this.button_Mosaic.Enabled = false;
             }
             else if (btn.Text == "使用画笔")
             {
                 btn.Text = "使用吸管";
                 this.pictureBox_WorkPlace.MouseDown += pictureBox2_Paint_MouseDown;
                 this.pictureBox_WorkPlace.MouseUp += pictureBox2_Paint_MouseUp;
+                this.button_Mosaic.Enabled = true;
             }
         }
 
@@ -654,11 +700,12 @@ namespace ImgProcessor
                 reset();
                 Size picSize = new Size();
                 //pictureBox1.Image = ToolFunctions.GetThumbnail((Bitmap)bitmap.Clone(), pictureBox1.Height, pictureBox1.Width) as Image;
-                Image temp = ToolFunctions.GetInitThumbnail((Bitmap)bitmap.Clone(), pictureBox_WorkPlace.Height, pictureBox_WorkPlace.Width,out picSize) as Image;
+                Image temp = ToolFunctions.GetInitThumbnail((Bitmap)bitmap.Clone(), 723, 1097,out picSize) as Image;
                 this.pictureBox_WorkPlace.Width = picSize.Width;
-                this.pictureBox_WorkPlace.Location = new Point(14 + 1097 / 2 - picSize.Width / 2, 25);
-                this.pictureBox_WorkPlace.Image = temp;
-                gReal = Graphics.FromImage(pictureBox_WorkPlace.Image);
+                this.pictureBox_WorkPlace.Height = picSize.Height;
+                this.pictureBox_WorkPlace.Location = new Point(14 + 1097 / 2 - picSize.Width / 2, 25+723/2-picSize.Height/2);
+                this.pictureBox_WorkPlace.Image = temp;//ToolFunctions.GetThumbnail((Bitmap)bitmap.Clone(), pictureBox_WorkPlace.Height, pictureBox_WorkPlace.Width);
+                gReal = Graphics.FromImage(this.pictureBox_WorkPlace.Image);
                 if (tabControl1.SelectedTab == null)
                 {
                     return;
@@ -727,11 +774,6 @@ namespace ImgProcessor
                     Hsi_Page_Init();
                 }
             }
-        }
-
-        private void tabControl1_MouseLeave(object sender, EventArgs e)
-        {
-            Grey_Page_Init();
         }
 
         private void Form1_Activated(object sender, EventArgs e)
@@ -815,6 +857,17 @@ namespace ImgProcessor
             tabControl1.SelectedTab = tabPage_etc;
         }
 
+        private void tabPage_Grey_Paint(object sender, PaintEventArgs e)
+        {
+            if (isChoosed == true)
+                Grey_Page_Init();
+        }
+
+        private void tabPage_Hsi_Paint(object sender, PaintEventArgs e)
+        {
+            if (isChoosed == true)
+                Hsi_Page_Init();
+        }
 
     }
 }

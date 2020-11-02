@@ -24,7 +24,7 @@ namespace ImgProcessor
             g2 = pictureBox2.CreateGraphics();
             //this.Load += new System.EventHandler(this.Grey_ScaleMapForm_Load);
             //this.pictureBox3.Paint += new System.Windows.Forms.PaintEventHandler(this.Grey_ScaleMapForm_Paint);
-            string path = "F:\\b.png";
+            string path = "F:\\cjk.jpg";
             bitmap = (Bitmap)Image.FromFile(path);
             bmpHist = bitmap;
 
@@ -323,14 +323,12 @@ namespace ImgProcessor
 
         private void button7_Click(object sender, EventArgs e)
         {
-            double x=ProcessFunctions.GaussNoise(0,1);
-            Console.WriteLine(x);
             Bitmap noiseBmp;
             ProcessFunctions.AddPepperSalt(bitmap, 0.2, 0.2, out noiseBmp);
             pictureBox1.Image = ToolFunctions.GetThumbnail((Bitmap)noiseBmp.Clone(), pictureBox1.Height, pictureBox1.Width) as Image;
-            Bitmap cleanBmp;
-            ProcessFunctions.MedianFilter(noiseBmp, out cleanBmp);
-            pictureBox2.Image = ToolFunctions.GetThumbnail((Bitmap)cleanBmp.Clone(), pictureBox2.Height, pictureBox2.Width) as Image;
+            //Bitmap cleanBmp;
+            //ProcessFunctions.MedianFilter(noiseBmp, out cleanBmp);
+            //pictureBox2.Image = ToolFunctions.GetThumbnail((Bitmap)cleanBmp.Clone(), pictureBox2.Height, pictureBox2.Width) as Image;
         }
 
         private void button8_Click(object sender, EventArgs e)
@@ -375,6 +373,32 @@ namespace ImgProcessor
             form.ShowDialog();
             //DialogResult r = form.DialogResult;
             //Console.WriteLine(r);
+        }
+
+        private void button12_Click(object sender, EventArgs e)
+        {
+            Size picSize = new Size();
+            Image temp = ToolFunctions.GetInitThumbnail((Bitmap)bitmap.Clone(), pictureBox1.Height, pictureBox1.Width, out picSize) as Image;
+            this.pictureBox1.Width = picSize.Width;
+            //this.pictureBox1.Location = new Point(14 + 1097 / 2 - picSize.Width / 2, 25);
+            this.pictureBox1.Image = temp;
+            this.pictureBox1.MouseClick += new MouseEventHandler((o, me) =>
+              {
+                  ProcessFunctions.test_01(bitmap, me.Location, pictureBox1.Size);               
+                  Console.WriteLine("location of Point:" + me.Location.X + "," + me.Location.Y);
+                  Bitmap outBmp;
+                  ProcessFunctions.setMosaic(bitmap, me.Location, pictureBox1.Size, 0, out outBmp);
+                  this.pictureBox1.Image = ToolFunctions.GetThumbnail(outBmp, pictureBox1.Height, pictureBox1.Width);
+                  //Console.WriteLine(pictureBox1.Width);
+              });
+            this.pictureBox1.MouseMove += new MouseEventHandler((o, me) =>
+            {
+                Bitmap outBmp;
+                ProcessFunctions.setMosaic(bitmap, me.Location, pictureBox1.Size, 0, out outBmp);
+                this.pictureBox1.Image = ToolFunctions.GetThumbnail(outBmp, pictureBox1.Height, pictureBox1.Width);
+                bitmap = new Bitmap(this.pictureBox1.Image);
+            });
+            
         }
     }
 }

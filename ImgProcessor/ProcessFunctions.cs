@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace ImgProcessor
@@ -13,31 +14,218 @@ namespace ImgProcessor
         {
             // Bitmap pic = (Bitmap)Bitmap.FromFile(filename, false);
             dstBmp = srcBmp;
+            Bitmap tmpBmp = (Bitmap)dstBmp.Clone();
             double P = Pb / (1 - Pa);//程序要,为了得到一个概率Pb事件
             int width = dstBmp.Width;
             int height = dstBmp.Height;
-            Random rand = new Random();
-            for (int i = 0; i < height; i++)
-            {
-                for (int j = 0; j < width; j++)
-                {
-                    Color noiseC = dstBmp.GetPixel(j, i);
-                    double probility = rand.NextDouble();
-                    if (probility < Pa)
-                    {
-                        noiseC = Color.White;//有Pa概率 噪声设为最大值
-                    }
-                    else
-                    {
-                        double temp = rand.NextDouble();
-                        if (temp < P)//有1 - Pa的几率到达这里，再乘以 P ，刚好等于Pb
-                            noiseC = Color.Black;
-                    }
+            Random rand = new Random(ToolFunctions.GetRandomSeed());
+            Rectangle rt = new Rectangle(0, 0, srcBmp.Width, srcBmp.Height);
+            BitmapData bmpData = tmpBmp.LockBits(rt, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+            Task t1 = new Task(() =>
+              {
+                  
+                  
+                  unsafe
+                  {
 
-                    Color color = noiseC;
-                    dstBmp.SetPixel(j, i, color);
+                      for (int i = 0; i < bmpData.Height/2; i++)
+                      {
+                          byte* ptr = (byte*)bmpData.Scan0 + i * bmpData.Stride;
+                          for (int j = 0; j < bmpData.Width/2; j++)
+                          {
+                              
+                              double probility = rand.NextDouble();
+                              rand.NextDouble();
+                              if (probility == 0)
+                              {
+                                  rand = new Random(ToolFunctions.GetRandomSeed());
+                                  //probility = rand.NextDouble();
+                              }
+                              if (probility < Pa)
+                              {
+
+                                  //noiseC = Color.White;//有Pa概率 噪声设为最大值
+                                  *(ptr + j * 3) = 255; //B
+                                  *(ptr + j * 3 + 1) = 255;//G
+                                  *(ptr + j * 3 + 2) = 255; //R
+                                  //Console.WriteLine("probility:"+probility);
+                              }
+                              else
+                              {
+                                  double temp = rand.NextDouble();
+                                  if (temp < P)//有1 - Pa的几率到达这里，再乘以 P ，刚好等于Pb
+                                  {
+                                      *(ptr + j * 3) = 0; //B
+                                      *(ptr + j * 3 + 1) = 0;//G
+                                      *(ptr + j * 3 + 2) = 0; //R
+                                  }
+                              }
+                          }
+                      }
+                  }
+                  //tmpBmp.UnlockBits(bmpData);
+              });
+            Task t2 = new Task(() =>
+            {
+                
+                //BitmapData bmpData = tmpBmp.LockBits(rt, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+                unsafe
+                {
+
+                    for (int i = bmpData.Height / 2; i < bmpData.Height; i++)
+                    {
+                        byte* ptr = (byte*)bmpData.Scan0 + i * bmpData.Stride;
+                        for (int j = 0; j < bmpData.Width / 2; j++)
+                        {
+                            double probility = rand.NextDouble();
+                            if (probility == 0)
+                            {
+                                rand = new Random(ToolFunctions.GetRandomSeed());
+                                //probility = rand.NextDouble();
+                            }
+                            if (probility < Pa)
+                            {
+
+                                //noiseC = Color.White;//有Pa概率 噪声设为最大值
+                                *(ptr + j * 3) = 255; //B
+                                *(ptr + j * 3 + 1) = 255;//G
+                                *(ptr + j * 3 + 2) = 255; //R
+                                                          //Console.WriteLine("probility:"+probility);
+                            }
+                            else
+                            {
+                                double temp = rand.NextDouble();
+                                if (temp < P)//有1 - Pa的几率到达这里，再乘以 P ，刚好等于Pb
+                                {
+                                    *(ptr + j * 3) = 0; //B
+                                    *(ptr + j * 3 + 1) = 0;//G
+                                    *(ptr + j * 3 + 2) = 0; //R
+                                }
+                            }
+                        }
+                    }
                 }
-            }
+                //tmpBmp.UnlockBits(bmpData);
+            });
+            Task t3 = new Task(() =>
+            {
+                
+                //BitmapData bmpData = tmpBmp.LockBits(rt, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+                unsafe
+                {
+
+                    for (int i = 0; i < bmpData.Height / 2; i++)
+                    {
+                        byte* ptr = (byte*)bmpData.Scan0 + i * bmpData.Stride;
+                        for (int j = bmpData.Width / 2; j < bmpData.Width; j++)
+                        {
+                            double probility = rand.NextDouble();
+                            if (probility == 0)
+                            {
+                                rand = new Random(ToolFunctions.GetRandomSeed());
+                                //probility = rand.NextDouble();
+                            }
+                            if (probility < Pa)
+                            {
+
+                                //noiseC = Color.White;//有Pa概率 噪声设为最大值
+                                *(ptr + j * 3) = 255; //B
+                                *(ptr + j * 3 + 1) = 255;//G
+                                *(ptr + j * 3 + 2) = 255; //R
+                                                          //Console.WriteLine("probility:"+probility);
+                            }
+                            else
+                            {
+                                double temp = rand.NextDouble();
+                                if (temp < P)//有1 - Pa的几率到达这里，再乘以 P ，刚好等于Pb
+                                {
+                                    *(ptr + j * 3) = 0; //B
+                                    *(ptr + j * 3 + 1) = 0;//G
+                                    *(ptr + j * 3 + 2) = 0; //R
+                                }
+                            }
+                        }
+                    }
+                }
+                //tmpBmp.UnlockBits(bmpData);
+            });
+            Task t4 = new Task(() =>
+            {
+                
+                //BitmapData bmpData = tmpBmp.LockBits(rt, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+                unsafe
+                {
+                    int i = bmpData.Height / 2;
+
+                    for (; i < bmpData.Height ; i++)
+                    {
+                        byte* ptr = (byte*)bmpData.Scan0 + i * bmpData.Stride;
+                        for (int j = bmpData.Width / 2; j < bmpData.Width; j++)
+                        {
+                            double probility = rand.NextDouble();
+                            if (probility == 0)
+                            {
+                                rand = new Random(ToolFunctions.GetRandomSeed());
+                                //probility = rand.NextDouble();
+                            }
+                            if (probility < Pa)
+                            {
+
+                                //noiseC = Color.White;//有Pa概率 噪声设为最大值
+                                *(ptr + j * 3) = 255; //B
+                                *(ptr + j * 3 + 1) = 255;//G
+                                *(ptr + j * 3 + 2) = 255; //R
+                                                          //Console.WriteLine("probility:"+probility);
+                            }
+                            else
+                            {
+                                double temp = rand.NextDouble();
+                                if (temp < P)//有1 - Pa的几率到达这里，再乘以 P ，刚好等于Pb
+                                {
+                                    *(ptr + j * 3) = 0; //B
+                                    *(ptr + j * 3 + 1) = 0;//G
+                                    *(ptr + j * 3 + 2) = 0; //R
+                                }
+                            }
+                        }
+                    }
+                    Console.WriteLine("over t4:"+i);
+                }
+                //tmpBmp.UnlockBits(bmpData);
+            });
+            
+
+            t1.Start();
+            t2.Start();
+            t3.Start();
+            t4.Start();
+            //t1.Wait();
+            
+            //t2.Wait();
+            Task.WaitAll(t1,t2,t3,t4);
+            tmpBmp.UnlockBits(bmpData);
+            dstBmp = tmpBmp;
+            //for (int i = 0; i < height; i++)
+            //{
+            //    for (int j = 0; j < width; j++)
+            //    {
+            //        Color noiseC = dstBmp.GetPixel(j, i);
+            //        double probility = rand.NextDouble();
+            //        if (probility < Pa)
+            //        {
+            //            noiseC = Color.White;//有Pa概率 噪声设为最大值
+            //        }
+            //        else
+            //        {
+            //            double temp = rand.NextDouble();
+            //            if (temp < P)//有1 - Pa的几率到达这里，再乘以 P ，刚好等于Pb
+            //                noiseC = Color.Black;
+            //        }
+
+            //        Color color = noiseC;
+            //        dstBmp.SetPixel(j, i, color);
+            //    }
+            //}
         }
         public static void AddGaussSalt(Bitmap srcBmp, out Bitmap dstBmp,GaussParam gp)
         {
@@ -498,6 +686,135 @@ namespace ImgProcessor
             dstBmp.UnlockBits(bmpData);
             return true;
         }
+        
+        public static Point Point2Pixel(Bitmap srcBmp, Point e, Size size)
+        {
+            Rectangle rt = new Rectangle(0, 0, srcBmp.Width, srcBmp.Height);
+            //Console.WriteLine("bitmap:" + srcBmp.Width + "," + srcBmp.Height + "; bmpData" + bmpData.Width + "," + bmpData.Height);
+            PointF offset = new PointF((float)srcBmp.Width / size.Width, (float)srcBmp.Height / size.Height);
+            Point res = new Point((int)(e.X * offset.X), (int)(e.Y * offset.Y));
+            return new Point(res.Y,res.X);
+        }
+        public static bool Painting(Bitmap srcBmp, Point clickPoint, Size boxSize, int level,Color c, out Bitmap dstBmp)
+        {
+            if (srcBmp == null)
+            {
+                dstBmp = null;
+                return false;
+            }
+            dstBmp = new Bitmap(srcBmp);
+            Rectangle rt = new Rectangle(0, 0, srcBmp.Width, srcBmp.Height);
+            BitmapData bmpData = dstBmp.LockBits(rt, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+
+            Point bmpP = Point2Pixel(srcBmp, clickPoint, boxSize);
+            int weight = level;
+            unsafe
+            {
+                byte* target_pixel_ptr = (byte*)bmpData.Scan0 + bmpP.X * bmpData.Stride + bmpP.Y * 3;
+                for (int i = -weight; i <= weight; i++)
+                {
+                    if (bmpP.X + i < 0 || bmpP.X + i >= bmpData.Height)
+                    {
+                        continue;
+                    }
+                    for (int j = -weight; j <= weight; j++)
+                    {
+                        if (bmpP.Y + j < 0 || bmpP.Y + j >= bmpData.Width)
+                        {
+                            continue;
+                        }
+                        byte* operPixel = (byte*)bmpData.Scan0 + (bmpP.X + i) * bmpData.Stride + (j + bmpP.Y) * 3;
+                        *(operPixel) = c.B;
+                        *(operPixel + 1) = c.G;
+                        *(operPixel + 2) = c.R;
+                    }
+                }
+            }
+            dstBmp.UnlockBits(bmpData);
+            return true;
+        }
+        public static bool setMosaic(Bitmap srcBmp,Point clickPoint,Size boxSize,int level,out Bitmap dstBmp)
+        {
+            if (srcBmp == null)
+            {
+                dstBmp = null;
+                return false;
+            }
+            dstBmp = new Bitmap(srcBmp);
+            Rectangle rt = new Rectangle(0, 0, srcBmp.Width, srcBmp.Height);
+            BitmapData bmpData = dstBmp.LockBits(rt, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+           
+            Point bmpP = Point2Pixel(srcBmp, clickPoint, boxSize);
+            int weight = level;
+            unsafe
+            {
+                byte* target_pixel_ptr= (byte*)bmpData.Scan0 + bmpP.X * bmpData.Stride+bmpP.Y*3;
+                for (int i = -weight; i <= weight; i++)
+                {
+                    if (bmpP.X+i<0||bmpP.X+i>=bmpData.Height)
+                    {
+                        continue;
+                    }
+                    for (int j = -weight; j <= weight; j++)
+                    {
+                        if (bmpP.Y + j < 0 || bmpP.Y + j >= bmpData.Width)
+                        {
+                            continue;
+                        }
+                        byte* operPixel= (byte*)bmpData.Scan0 + (bmpP.X+i) * bmpData.Stride + (j+bmpP.Y) * 3;
+                        *(operPixel) = *(target_pixel_ptr);
+                        *(operPixel + 1) = *(target_pixel_ptr + 1);
+                        *(operPixel + 2) = *(target_pixel_ptr + 2);
+                    }
+                }
+            }
+            dstBmp.UnlockBits(bmpData);
+            return true;
+        }
+        #region test region
+        public static Point test_01(Bitmap srcBmp,Point e,Size size)
+        {
+            Rectangle rt = new Rectangle(0, 0, srcBmp.Width, srcBmp.Height);
+            //Console.WriteLine("bitmap:" + srcBmp.Width + "," + srcBmp.Height + "; bmpData" + bmpData.Width + "," + bmpData.Height);
+            PointF offset = new PointF((float)srcBmp.Width / size.Width, (float)srcBmp.Height / size.Height);
+            
+            Console.WriteLine("w:"+srcBmp.Width+","+size.Width+";h:"+srcBmp.Height+","+size.Width);
+            Console.WriteLine("bitmap point:" + (int)(e.X * offset.X) + "," + (int)(e.Y * offset.Y));
+            Point res = new Point((int)(e.X * offset.X), (int)(e.Y * offset.Y));
+            return (res);
+        }
+        public static bool GetPoint2Pixel_Test(Bitmap srcBmp, out Bitmap dstBmp,Point p)
+        {
+            if (srcBmp == null)
+            {
+                dstBmp = null;
+                return false;
+            }
+            dstBmp = new Bitmap(srcBmp);
+            Rectangle rt = new Rectangle(0, 0, srcBmp.Width, srcBmp.Height);
+            BitmapData bmpData = dstBmp.LockBits(rt, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+            //Console.WriteLine("bitmap:" + srcBmp.Width + "," + srcBmp.Height + "; bmpData" + bmpData.Width + "," + bmpData.Height);
+            unsafe
+            {
+
+                for (int i = 0; i < bmpData.Height; i++)
+                {
+                    byte* ptr = (byte*)bmpData.Scan0 + i * bmpData.Stride;
+                    for (int j = 0; j < bmpData.Width; j++)
+                    {
+                        //Color c = Color.FromArgb(*(ptr + j * 3 + 2), *(ptr + j * 3 + 1), *(ptr + j * 3));
+                        //Color nc = Hsl_Pixel_Change(c, type, level);
+
+                        //*(ptr + j * 3) = nc.B; //B
+                        //*(ptr + j * 3 + 1) = nc.G;//G
+                        //*(ptr + j * 3 + 2) = nc.R; //R
+                    }
+                }
+            }
+            dstBmp.UnlockBits(bmpData);
+            return true;
+        }
+        #endregion
         public static Color HSL2RGB(double h, double sl, double l)
         {
             h /= 360;

@@ -133,6 +133,7 @@
             this.button_checkOrigin = new System.Windows.Forms.Button();
             this.pictureBox_WorkPlace = new System.Windows.Forms.PictureBox();
             this.pictureBox_eg = new System.Windows.Forms.PictureBox();
+            this.button_Mosaic = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.trackBar_DV)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.trackBar_SV)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.trackBar_Nd)).BeginInit();
@@ -516,7 +517,7 @@
             // label_state
             // 
             this.label_state.AutoSize = true;
-            this.label_state.Location = new System.Drawing.Point(1287, 736);
+            this.label_state.Location = new System.Drawing.Point(1277, 736);
             this.label_state.Name = "label_state";
             this.label_state.Size = new System.Drawing.Size(29, 12);
             this.label_state.TabIndex = 15;
@@ -622,6 +623,7 @@
             // 
             // tabPage_Paint
             // 
+            this.tabPage_Paint.Controls.Add(this.button_Mosaic);
             this.tabPage_Paint.Controls.Add(this.label30);
             this.tabPage_Paint.Controls.Add(this.label_PBlue);
             this.tabPage_Paint.Controls.Add(this.label_PG);
@@ -761,7 +763,7 @@
             // 
             this.panel_ColorPick.BackColor = System.Drawing.Color.Red;
             this.panel_ColorPick.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.panel_ColorPick.Location = new System.Drawing.Point(229, 25);
+            this.panel_ColorPick.Location = new System.Drawing.Point(130, 23);
             this.panel_ColorPick.Name = "panel_ColorPick";
             this.panel_ColorPick.Size = new System.Drawing.Size(48, 43);
             this.panel_ColorPick.TabIndex = 1;
@@ -797,6 +799,7 @@
             this.tabPage_Grey.Size = new System.Drawing.Size(340, 642);
             this.tabPage_Grey.TabIndex = 1;
             this.tabPage_Grey.Text = "灰度变换";
+            this.tabPage_Grey.Paint += new System.Windows.Forms.PaintEventHandler(this.tabPage_Grey_Paint);
             // 
             // label37
             // 
@@ -926,6 +929,7 @@
             this.tabPage_Hsi.Size = new System.Drawing.Size(340, 642);
             this.tabPage_Hsi.TabIndex = 2;
             this.tabPage_Hsi.Text = "Hsi模块";
+            this.tabPage_Hsi.Paint += new System.Windows.Forms.PaintEventHandler(this.tabPage_Hsi_Paint);
             // 
             // trackBar_Hsi_S
             // 
@@ -1109,35 +1113,35 @@
             // 涂鸦ToolStripMenuItem
             // 
             this.涂鸦ToolStripMenuItem.Name = "涂鸦ToolStripMenuItem";
-            this.涂鸦ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.涂鸦ToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
             this.涂鸦ToolStripMenuItem.Text = "涂鸦";
             this.涂鸦ToolStripMenuItem.Click += new System.EventHandler(this.涂鸦ToolStripMenuItem_Click);
             // 
             // 灰度变换ToolStripMenuItem
             // 
             this.灰度变换ToolStripMenuItem.Name = "灰度变换ToolStripMenuItem";
-            this.灰度变换ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.灰度变换ToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
             this.灰度变换ToolStripMenuItem.Text = "灰度变换";
             this.灰度变换ToolStripMenuItem.Click += new System.EventHandler(this.灰度变换ToolStripMenuItem_Click);
             // 
             // hsi模块ToolStripMenuItem
             // 
             this.hsi模块ToolStripMenuItem.Name = "hsi模块ToolStripMenuItem";
-            this.hsi模块ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.hsi模块ToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
             this.hsi模块ToolStripMenuItem.Text = "Hsi模块";
             this.hsi模块ToolStripMenuItem.Click += new System.EventHandler(this.hsi模块ToolStripMenuItem_Click);
             // 
             // 噪声模块ToolStripMenuItem
             // 
             this.噪声模块ToolStripMenuItem.Name = "噪声模块ToolStripMenuItem";
-            this.噪声模块ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.噪声模块ToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
             this.噪声模块ToolStripMenuItem.Text = "噪声模块";
             this.噪声模块ToolStripMenuItem.Click += new System.EventHandler(this.噪声模块ToolStripMenuItem_Click);
             // 
             // 其他功能ToolStripMenuItem
             // 
             this.其他功能ToolStripMenuItem.Name = "其他功能ToolStripMenuItem";
-            this.其他功能ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.其他功能ToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
             this.其他功能ToolStripMenuItem.Text = "其他功能";
             this.其他功能ToolStripMenuItem.Click += new System.EventHandler(this.其他功能ToolStripMenuItem_Click);
             // 
@@ -1168,6 +1172,16 @@
             this.pictureBox_eg.TabIndex = 8;
             this.pictureBox_eg.TabStop = false;
             // 
+            // button_Mosaic
+            // 
+            this.button_Mosaic.Location = new System.Drawing.Point(202, 34);
+            this.button_Mosaic.Name = "button_Mosaic";
+            this.button_Mosaic.Size = new System.Drawing.Size(75, 23);
+            this.button_Mosaic.TabIndex = 13;
+            this.button_Mosaic.Text = "马赛克笔";
+            this.button_Mosaic.UseVisualStyleBackColor = true;
+            this.button_Mosaic.Click += new System.EventHandler(this.button_Mosaic_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -1184,6 +1198,7 @@
             this.Controls.Add(this.label2);
             this.Controls.Add(this.pictureBox_WorkPlace);
             this.Controls.Add(this.label_funcName);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "Form1";
             this.Text = "lab";
@@ -1338,6 +1353,7 @@
         private System.Windows.Forms.Label label42;
         private System.Windows.Forms.Label label43;
         private System.Windows.Forms.Button button_checkOrigin;
+        private System.Windows.Forms.Button button_Mosaic;
     }
 }
 

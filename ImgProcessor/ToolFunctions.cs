@@ -16,6 +16,7 @@ namespace ImgProcessor
         public static Bitmap GetInitThumbnail(Bitmap b, int destHeight, int destWidth,out Size size)
         {
             System.Drawing.Image imgSource = b;
+            
             System.Drawing.Imaging.ImageFormat thisFormat = imgSource.RawFormat;
             int sW = 0, sH = 0;
             // 按比例缩放           
